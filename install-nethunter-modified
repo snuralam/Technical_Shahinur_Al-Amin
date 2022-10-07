@@ -113,7 +113,7 @@ function check_dependencies() {
     done
     apt upgrade -y && apt install pulseaudio -y &&  apt install wget -y && apt update && clear &&
     echo "sound && nh1" >> $PREFIX/bin/nh && echo "sound && nethunter1" >> $PREFIX/bin/nethunter &&
-    wget https://raw.githubusercontent.com/snuralam/shahinur/main/sound https://raw.githubusercontent.com/snuralam/Technical_Shahinur_Al-Amin/main/default.pa https://raw.githubusercontent.com/snuralam/Technical_Shahinur_Al-Amin/main/daemon.conf && clear &&
+    wget https://raw.githubusercontent.com/snuralam/shahinur/main/sound https://raw.githubusercontent.com/snuralam/Technical_Shahinur_Al-Amin/main/default.pa https://raw.githubusercontent.com/snuralam/Technical_Shahinur_Al-Amin/main/daemon.conf &&
     mv sound $PREFIX/bin/sound && mv default.pa $PREFIX/etc/pulse/default.pa && mv daemon.conf $PREFIX/etc/pulse/daemon.conf &&
     chmod +x $PREFIX/bin/sound $PREFIX/bin/nh $PREFIX/bin/nethunter
 }
