@@ -112,9 +112,8 @@ function check_dependencies() {
         fi
     done
     apt upgrade -y && apt install pulseaudio -y && apt update &&
-    echo "sound && nh1" >> $PREFIX/bin/nh && echo "sound && nethunter1" >> $PREFIX/bin/nethunter &&
-    chmod +x $PREFIX/bin/nh $PREFIX/bin/nethunter &&
-    rm -f $PREFIX/etc/pulse/default.pa $PREFIX/etc/pulse/daemon.conf
+    rm -rf $PREFIX/etc/pulse/default.pa $PREFIX/etc/pulse/daemon.conf /sdcard/Kali_Setup &&
+    mkdir /sdcard/Kali_Setup
 }
 
 function pulse_sound() {
@@ -402,9 +401,10 @@ function extract_rootfs() {
 
 
 function create_launcher() {
-    NH1_LAUNCHER=${PREFIX}/bin/nethunter1
-    NH1_SHORTCUT=${PREFIX}/bin/nh1
-    cat > $NH1_LAUNCHER <<- EOF
+    NH_LAUNCHER=${PREFIX}/bin/nethunter
+    NH_SHORTCUT=${PREFIX}/bin/nh
+    cat > $NH_LAUNCHER <<- EOF
+sound &&
 #!/data/data/com.termux/files/usr/bin/bash -e
 cd \${HOME}
 ## termux-exec sets LD_PRELOAD so let's unset it before continuing
@@ -459,12 +459,12 @@ else
 fi
 EOF
 
-    chmod 700 $NH1_LAUNCHER
-    if [ -L ${NH1_SHORTCUT} ]; then
-        rm -f ${NH1_SHORTCUT}
+    chmod 700 $NH_LAUNCHER
+    if [ -L ${NH_SHORTCUT} ]; then
+        rm -f ${NH_SHORTCUT}
     fi
-    if [ ! -f ${NH1_SHORTCUT} ]; then
-        ln -s ${NH1_LAUNCHER} ${NH1_SHORTCUT} >/dev/null
+    if [ ! -f ${NH_SHORTCUT} ]; then
+        ln -s ${NH_LAUNCHER} ${NH_SHORTCUT} >/dev/null
     fi
 }
 
@@ -586,13 +586,13 @@ function fix_uid() {
     ## Change kali uid and gid to match that of the termux user
     USRID=$(id -u)
     GRPID=$(id -g)
-    nh1 -r usermod -u $USRID kali 2>/dev/null
-    nh1 -r groupmod -g $GRPID kali 2>/dev/null
+    nh -r usermod -u $USRID kali 2>/dev/null
+    nh -r groupmod -g $GRPID kali 2>/dev/null
 }
 
 function network_setup() {
-    NETWORK=${CHROOT}/home/kali/Desktop/Firefox_Network_Setup.txt
-    cat > $NETWORK <<- EOF
+    NETWORK_LAUNCHER=${CHROOT}/home/kali/Desktop/Firefox_Network_Setup.txt
+    cat > $NETWORK_LAUNCHER <<- EOF
 Technical Shahinur_Al-Amin
 Network Setup Video =
 https://youtu.be/tSI9PzjsjCI
@@ -613,6 +613,7 @@ media.cubeb.sandbox (false)
 
 security.sandbox.content.level (0)
 EOF
+
 }
 
 function fonts_setup() {
@@ -638,10 +639,18 @@ Type:
 
 tz
 
-and command : sudo password : 
+and command : sudo password :
+
+sudo password is kali
 
 Thanks
 EOF
+}
+
+function copy_file_to_sdcard() {
+    cp ${CHROOT}/home/kali/Desktop/Firefox_Network_Setup.txt /sdcard/Kali_Setup &&
+    cp ${CHROOT}/home/kali/Desktop/Fonts_Setup.txt /sdcard/Kali_Setup &&
+    cp ${CHROOT}/home/kali/Desktop/Time_Zone_Comman.txt /sdcard/Kali_Setup
 }
 
 function print_banner() {
@@ -707,6 +716,7 @@ tz_command
 fix_uid
 network_setup
 fonts_setup
+copy_file_to_sdcard
 
 print_banner
 printf "${green}[=] Kali NetHunter for Termux installed successfully${reset}\n\n"
