@@ -1,0 +1,15 @@
+Command for non-rooted:
+
+about:config
+
+media.cubeb.sandbox (true)
+
+security.sandbox.content.level (0)
+
+Command for rooted:
+
+about:config
+
+media.cubeb.sandbox (false)
+
+security.sandbox.content.level (0)
