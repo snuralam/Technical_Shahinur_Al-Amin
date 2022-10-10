@@ -2,6 +2,7 @@
 
 VERSION=2020011601
 BASE_URL=https://kali.download/nethunter-images/current/rootfs
+VOICE_URL=https://github.com/snuralam/Technical_Shahinur_Al-Amin/raw/main/Kali_Voice.tar.xz
 USERNAME=kali
 
 if [ -f "/usr/bin/getprop" ]; then getprop="1"; fi
@@ -68,6 +69,8 @@ function set_strings() {
     CHROOT=kali-${SYS_ARCH}
     IMAGE_NAME=kalifs-${SYS_ARCH}-full.tar.xz
     SHA_NAME=kalifs-${SYS_ARCH}-full.sha512sum
+    VOICE=Kali_Voice
+    VOICE_NAME=Kali_Voice.tar.xz
 }
 
 function prepare_fs() {
@@ -80,6 +83,17 @@ function prepare_fs() {
         fi
     fi
 }
+
+function prepare_voice() {
+    unset KEEP_VOICE
+    if [ -d ${VOICE} ]; then
+        if ask "Existing voice directory found. Delete and create a new one?" "N"; then
+            rm -rf ${VOICE}
+        else
+            KEEP_VOICE=1
+        fi
+    fi
+ }
 
 function cleanup() {
     if [ -f ${IMAGE_NAME} ]; then
@@ -94,11 +108,21 @@ function cleanup() {
     fi
 }
 
+function cleanup_voice() {
+    if [ -f ${VOICE_NAME} ]; then
+        if ask "Delete downloaded voice file?" "N"; then
+            if [ -f ${VOICE_NAME} ]; then
+                rm -f ${VOICE_NAME}
+            fi
+        fi
+    fi
+}
+
 function check_dependencies() {
     printf "${blue}\n[*] Checking package dependencies...${reset}\n"
     ## Workaround for termux-app issue #1283 (https://github.com/termux/termux-app/issues/1283)
     ##apt update -y &> /dev/null
-    termux-setup-storage && apt-get update -y &> /dev/null || apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" dist-upgrade -y &> /dev/null
+    termux-setup-storage -y && apt-get update -y &> /dev/null || apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" dist-upgrade -y &> /dev/null
 
     for i in proot tar axel; do
         if [ -e $PREFIX/bin/$i ]; then
@@ -111,9 +135,8 @@ function check_dependencies() {
             }
         fi
     done
-    apt upgrade -y && apt install pulseaudio -y && apt update &&
-    rm -rf $PREFIX/etc/pulse/default.pa $PREFIX/etc/pulse/daemon.conf /sdcard/Kali_Setup &&
-    mkdir /sdcard/Kali_Setup
+    apt upgrade -y && apt update && apt install wget -y && apt install play-audio -y && apt install pulseaudio -y &&
+    rm -rf /sdcard/Kali_Setup && mkdir /sdcard/Kali_Setup
 }
 
 function pulse_sound() {
@@ -369,6 +392,19 @@ function get_rootfs() {
     axel ${EXTRA_ARGS} --alternate "$ROOTFS_URL"
 }
 
+function get_voice() {
+    if [ -f ${VOICE_NAME} ]; then
+        if ask "Existing voice file found. Delete and download a new one?" "N"; then
+            rm -f ${VOICE_NAME}
+        else
+            printf "${yellow}[!] Using existing voice archive${reset}\n"
+            return
+        fi
+    fi
+    printf "${blue}[*] Downloading voice...${reset}\n\n"
+    axel ${EXTRA_ARGS} --alternate "$VOICE_URL"
+}
+
 function get_sha() {
     if [ -z $KEEP_IMAGE ]; then
         printf "\n${blue}[*] Getting SHA ... ${reset}\n\n"
@@ -399,12 +435,20 @@ function extract_rootfs() {
     fi
 }
 
+function extract_voice() {
+    if [ -z $KEEP_VOICE ]; then
+        printf "\n${blue}[*] Extracting voice... ${reset}\n\n"
+        proot --link2symlink tar -xf $VOICE_NAME 2> /dev/null || :
+    else
+        printf "${yellow}[!] Using existing voice directory${reset}\n"
+    fi
+}
 
 function create_launcher() {
     NH_LAUNCHER=${PREFIX}/bin/nethunter
     NH_SHORTCUT=${PREFIX}/bin/nh
     cat > $NH_LAUNCHER <<- EOF
-sound &&
+sound && play-audio Kali_Voice/NetHunter.wav &&
 #!/data/data/com.termux/files/usr/bin/bash -e
 cd \${HOME}
 ## termux-exec sets LD_PRELOAD so let's unset it before continuing
@@ -466,6 +510,11 @@ EOF
     if [ ! -f ${NH_SHORTCUT} ]; then
         ln -s ${NH_LAUNCHER} ${NH_SHORTCUT} >/dev/null
     fi
+}
+
+function welcome_voice() {
+    printf "${green}Welcome To Kali${reset}\n\n"
+    play-audio Kali_Voice/Welcome_to_Kali.wav && play-audio Kali_Voice/Modified_By_Tecnical_Shahinur_Al_Amin.wav
 }
 
 function create_kex_launcher() {
@@ -653,11 +702,14 @@ function copy_file_to_sdcard() {
     cp ${CHROOT}/home/kali/Desktop/Time_Zone_Comman.txt /sdcard/Kali_Setup
 }
 
+function play_audio() {
+    play-audio Kali_Voice/Kali_NetHunter_for_Termux_installed_successfully.wav && play-audio Kali_Voice/Modified_By_Tecnical_Shahinur_Al_Amin.wav
+}
+
 function print_banner() {
     clear
     printf "${yellow}##################################################\n"
     printf "${yellow}##         ${light_cyan}Technical Shahinur_Al-Amin${yellow}           ##\n"
-    printf "${yellow}##                                              ##\n"
     printf "${yellow}##  ${red}88      a8P         db        88        88${yellow}  ##\n"
     printf "${yellow}##  ${red}88    .88'         d88b       88        88${yellow}  ##\n"
     printf "${yellow}##  ${red}88   88'          d8''8b      88        88${yellow}  ##\n"
@@ -666,7 +718,6 @@ function print_banner() {
     printf "${yellow}##  ${red}88P   Y8b      d8''''''''8b   88        88${yellow}  ##\n"
     printf "${yellow}##  ${red}88     '88.   d8'        '8b  88        88${yellow}  ##\n"
     printf "${yellow}##  ${red}88       Y8b d8'          '8b 888888888 88${yellow}  ##\n"
-    printf "${yellow}##                                              ##\n"
     printf "${yellow}##               ${blue}Moded By Shahinur${yellow}              ##\n"
     printf "${yellow}####  ############## ${green}NetHunter${yellow} #############  ####${reset}\n\n"
 }
@@ -696,17 +747,21 @@ print_banner
 get_arch
 set_strings
 prepare_fs
+prepare_voice
 check_dependencies
 pulse_sound
 sound_default
 sound_daemon
 get_rootfs
+get_voice
 get_sha
 verify_sha
 extract_rootfs
+extract_voice
 create_launcher
 cleanup
-
+cleanup_voice
+welcome_voice
 printf "\n${blue}[*] Configuring NetHunter for Termux ...\n"
 fix_profile_bash
 fix_sudo
@@ -732,4 +787,6 @@ printf "${green}[+] nethunter -r          # To run NetHunter as root${reset}\n"
 #printf "${green}[+] nethunter kex stop    # To stop NetHunter GUI root session${reset}\n"
 #printf "${green}[+] nethunter -r kex kill # To stop all NetHunter GUI sessions${reset}\n"
 #printf "${green}[+] nethunter -r kex <command> # Run command in NetHunter env as root${reset}\n"
-printf "${green}[+] nh                    # Shortcut for nethunter${reset}\n\n"
+printf "${green}[+] nh                    # Shortcut for nethunter${reset}\n"
+printf "${green}[+] nh tz  #Time.Zone.Setup> 1st type nh then tz${reset}\n\n"
+play_audio
