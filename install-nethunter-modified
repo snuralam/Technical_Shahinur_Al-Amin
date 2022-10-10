@@ -513,8 +513,10 @@ EOF
 }
 
 function welcome_voice() {
-    printf "${green}Welcome To Kali${reset}\n\n"
-    play-audio Kali_Voice/Welcome_to_Kali.wav && play-audio Kali_Voice/Modified_By_Tecnical_Shahinur_Al_Amin.wav
+    printf "${green}Welcome To Kali${reset}\n"
+    play-audio Kali_Voice/Welcome_to_Kali.wav &&
+    printf "${green}Modified By Tecnical Shahinur_Al-Amin${reset}\n\n"
+    play-audio Kali_Voice/Modified_By_Tecnical_Shahinur_Al_Amin.wav
 }
 
 function create_kex_launcher() {
