@@ -517,9 +517,9 @@ function welcome_voice() {
     printf "${green}##    Welcome To Kali    ##\n"
     play-audio $PREFIX/bin/kali_voice/Welcome_to_Kali.wav &&
     printf "${red}##*********************************##\n"
-    printf "${blue}[]\ [] []_[]   [][]  [][]      [][]\\n"
-    printf "${blue}[]\√[] []_[]   []  []  []      []  []\n"
-    printf "${blue}[] \[] [] []   []  []  []ODIFIE[][]/${reset}\n\n"
+    printf "${light_cyan}[]\ [] []_[]   [][]  [][]      [][]\\n"
+    printf "${light_cyan}[]\√[] []_[]   []  []  []      []  []\n"
+    printf "${light_cyan}[] \[] [] []   []  []  []ODIFIE[][]/${reset}\n\n"
     play-audio $PREFIX/bin/kali_voice/installing_voice.wav
 }
 
