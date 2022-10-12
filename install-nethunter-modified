@@ -714,7 +714,7 @@ function play_audio() {
 }
 
 function alhamdulillah() {
-    tempimage bangladesh && play-audio $PREFIX/bin/alhamdulillah.wav
+    tempimage $PREFIX/bin/kali_voice/bangladesh.png && play-audio $PREFIX/bin/alhamdulillah.mp3
 }
 
 function print_banner() {
