@@ -713,6 +713,10 @@ function play_audio() {
     play-audio $PREFIX/bin/kali_voice/Kali_NetHunter_for_Termux_installed_successfully.wav && play-audio Kali_Voice/Modified_By_Tecnical_Shahinur_Al_Amin.wav
 }
 
+function alhamdulillah() {
+    tempimage bangladesh && play-audio $PREFIX/bin/alhamdulillah.wav
+}
+
 function print_banner() {
     clear
     printf "${yellow}##################################################\n"
@@ -781,6 +785,7 @@ fonts_setup
 copy_file_to_sdcard
 
 print_banner
+alhamdulillah
 printf "${green}[=] Kali NetHunter for Termux installed successfully${reset}\n\n"
 printf "${green}[+] To start Kali NetHunter, type:${reset}\n"
 printf "${green}[+] nethunter             # To start NetHunter CLI${reset}\n"
