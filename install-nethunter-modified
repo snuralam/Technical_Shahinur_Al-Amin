@@ -714,6 +714,7 @@ function play_audio() {
 }
 
 function alhamdulillah() {
+    printf "${green}##        Alhamdulillah         ##${reset}\n\n" &&
     termimage $PREFIX/bin/kali_voice/bangladesh.png && play-audio $PREFIX/bin/alhamdulillah.mp3
 }
 
