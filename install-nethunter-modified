@@ -595,6 +595,11 @@ EOF
 }
 
 function time_zone() {
+    unset KEEP_TIME
+    if [ -f ${CHROOT}/usr/bin/tz ]; then
+        KEEP_TIME=1
+    fi
+    if [ -z $KEEP_TIME ]; then
     TIME_ZONE=${CHROOT}/usr/bin/tz
     cat > $TIME_ZONE <<- EOF
 #!/bin/bash
@@ -602,6 +607,7 @@ sudo dpkg-reconfigure tzdata
 EOF
 
     chmod 700 $TIME_ZONE
+    fi
 }
 
 function fix_profile_bash() {
