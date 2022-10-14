@@ -497,13 +497,13 @@ EOF
 }
 
 function welcome_voice() {
-    printf "${green}##    Welcome To Kali    ##\n"
+    printf "${green}##*★*★*★*★*[  Welcome To Kali  ]*★*★*★*★*★*##\n"
     play-audio $PREFIX/bin/kali_voice/Welcome_to_Kali.wav &&
-    printf "${light_cyan}##******************************************##\n"
-    printf "${light_cyan}##  []\ [] []  []   [][\ /][]        [][]\  ##\n"
-    printf "${light_cyan}##  []\√[] []##[]‌   [] \√/ []        []  [] ##\n"
-    printf "${light_cyan}##  [] \[] []  []   []     [] ODIFIE [][]/  ##\n"
-    printf "${light_cyan}##★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★##${reset}\n\n"
+    printf "${light_cyan}##*****************************************##\n"
+    printf "${light_cyan}## []\ [] []  []   [][\ /][]        [][]\  ##\n"
+    printf "${light_cyan}## []\√[] []##[]‌   [] \√/ []        []  )] ##\n"
+    printf "${light_cyan}## [] \[] []  []   []     [] ODIFIE [][]/  ##\n"
+    printf "${light_cyan}##★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★##${reset}\n\n"
     play-audio $PREFIX/bin/kali_voice/installing_voice.wav
 }
 
@@ -729,7 +729,7 @@ function play_audio() {
 
 function alhamdulillah() {
     printf "${green}##               Alhamdulillah                 ##\n"
-    printf "${blue}**************************************************\n"
+    printf "${blue}*************************************************\n"
     printf "${green}#################################################\n"
     printf "${green}########################${red}#${green}########################\n"
     printf "${green}######################${red}#####${green}######################\n"
