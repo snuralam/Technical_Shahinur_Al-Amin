@@ -1,3 +1,0 @@
-Time Zone Setup: command type:
-
- sudo dpkg-reconfigure tzdata
