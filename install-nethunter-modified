@@ -424,9 +424,8 @@ function create_launcher() {
     NH_LAUNCHER=${PREFIX}/bin/nethunter
     NH_SHORTCUT=${PREFIX}/bin/nh
     cat > $NH_LAUNCHER <<- EOF
-pulseaudio --start --load="module-native-protocol-tcp auth-ip-acl=127.0.0.1 auth-anonymous=1" --exit-idle-time=-1 && play-audio $PREFIX/bin/kali_voice/NetHunter.wav &&
 #!/data/data/com.termux/files/usr/bin/bash -e
-cd \${HOME}
+cd \${HOME} && pulseaudio --start --load="module-native-protocol-tcp auth-ip-acl=127.0.0.1 auth-anonymous=1" --exit-idle-time=-1 && play-audio $PREFIX/bin/kali_voice/NetHunter.wav &&
 ## termux-exec sets LD_PRELOAD so let's unset it before continuing
 unset LD_PRELOAD
 ## Workaround for Libreoffice, also needs to bind a fake /proc/version
