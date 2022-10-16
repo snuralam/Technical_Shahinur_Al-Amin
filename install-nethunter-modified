@@ -159,13 +159,6 @@ function prepare_fs() {
     fi
 }
 
-function prepare_voice() {
-    unset KEEP_VOICE
-    if [ -d ${VOICE} ]; then
-        KEEP_VOICE=1
-    fi
- }
-
 function cleanup() {
     if [ -f ${IMAGE_NAME} ]; then
         if ask "Delete downloaded rootfs file?" "N"; then
@@ -486,10 +479,13 @@ function extract_rootfs() {
 }
 
 function extract_voice() {
-cd $PREFIX/bin
+    unset KEEP_VOICE
+    if [ -d ${VOICE} ]; then
+        KEEP_VOICE=1
+    fi
     if [ -z $KEEP_VOICE ]; then
         printf "\n${blue}[*] Extracting voice... ${reset}\n\n"
-        proot --link2symlink tar -xf $VOICE_NAME 2> /dev/null || :
+        cd $PREFIX/bin && proot --link2symlink tar -xf $VOICE_NAME 2> /dev/null || :
     else
         printf "${yellow}[!] Using existing voice directory${reset}\n"
     fi
@@ -578,7 +574,6 @@ function create_kex_launcher() {
     KEX_LAUNCHER=${CHROOT}/usr/bin/kex
     cat > $KEX_LAUNCHER <<- EOF
 #!/bin/bash
-
 function gnu() {
    case $archcase in
         arm64-v8a|arm64-v8|aarch64|arm64)
@@ -678,7 +673,7 @@ EOF
 }
 
 function fix_profile_bash() {
-    cd $HOME
+cd $HOME
     ## Prevent attempt to create links in read only filesystem
     if [ -f ${CHROOT}/root/.bash_profile ]; then
         sed -i '/if/,/fi/d' "${CHROOT}/root/.bash_profile"
@@ -703,14 +698,11 @@ function fix_uid() {
     nh -r groupmod -g $GRPID kali 2>/dev/null
 }
 
-function prepare_kali_setup() {
+function create_kali_setup_folder() {
     unset KEEP_KALI
     if [ -d /sdcard/kali_setup ]; then
         KEEP_KALI=1
     fi
-}
-
-function kali_setup() {
     if [ -z $KEEP_KALI ]; then
         mkdir /sdcard/kali_setup
     fi
@@ -790,11 +782,6 @@ EOF
   fi
 }
 
-function play_audio() {
-    play-audio ${VOICE7}
-    play-audio ${VOICE8}
-}
-
 function alhamdulillah() {
     printf "${green}##               Alhamdulillah                 ##\n"
     printf "${blue}*************************************************\n"
@@ -864,7 +851,6 @@ extract_rootfs
 create_launcher
 cleanup
 get_voice
-prepare_voice
 extract_voice
 play-audio ${VOICE3}
 welcome_voice
@@ -873,8 +859,7 @@ fix_profile_bash
 fix_sudo
 create_kex_launcher
 fix_uid
-prepare_kali_setup
-kali_setup
+create_kali_setup_folder
 time_zone
 tz_command
 network_setup
@@ -897,4 +882,5 @@ printf "${green}[+] nethunter -r          # To run NetHunter as root${reset}\n"
 #printf "${green}[+] nethunter -r kex <command> # Run command in NetHunter env as root${reset}\n"
 printf "${green}[+] nh                    # Shortcut for nethunter${reset}\n"
 printf "${green}[+] nh tz  #Time.Zone.Setup> 1st type nh then tz${reset}\n\n"
-play_audio
+play-audio ${VOICE7}
+play-audio ${VOICE8}
