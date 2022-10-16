@@ -79,6 +79,7 @@ function set_strings() {
     VOICE6=$PREFIX/bin/kali_voice/congratulations.mp3
     VOICE7=$PREFIX/bin/kali_voice/Kali_NetHunter_for_Termux_installed_successfully.wav
     VOICE8=$PREFIX/bin/kali_voice/Modified_By_Tecnical_Shahinur_Al_Amin.wav
+    VOICE9=$PREFIX/bin/kali_voice/xp_folder_open_sound.mp3
 }
 
 function cleanup_voice_file() {
@@ -136,6 +137,13 @@ function cleanup_voice_file() {
         KEEP_VF8=1
     fi
     if [ -z $KEEP_VF8 ]; then
+         rm -rf ${VOICE} ${VOICE_NAME}
+    fi
+    unset KEEP_VF9
+    if [ -f ${VOICE9} ]; then
+        KEEP_VF9=1
+    fi
+    if [ -z $KEEP_VF9 ]; then
          rm -rf ${VOICE} ${VOICE_NAME}
     fi
 }
@@ -493,7 +501,7 @@ function create_launcher() {
     cat > $NH_LAUNCHER <<- EOF
 #!/data/data/com.termux/files/usr/bin/bash -e
 cd \${HOME}
-play-audio ${VOICE3}
+play-audio ${VOICE9}
 pulseaudio --start --load="module-native-protocol-tcp auth-ip-acl=127.0.0.1 auth-anonymous=1" --exit-idle-time=-1
 ## termux-exec sets LD_PRELOAD so let's unset it before continuing
 unset LD_PRELOAD
@@ -522,7 +530,6 @@ if [[ \$KALIUSR == "0" || ("\$#" != "0" && ("\$1" == "-r" || "\$1" == "-R")) ]];
         shift
     fi
 fi
-
 cmdline="proot \\
         --link2symlink \\
         -0 \\
@@ -671,7 +678,7 @@ EOF
 }
 
 function fix_profile_bash() {
-    cd $HOME &&
+    cd $HOME
     ## Prevent attempt to create links in read only filesystem
     if [ -f ${CHROOT}/root/.bash_profile ]; then
         sed -i '/if/,/fi/d' "${CHROOT}/root/.bash_profile"
@@ -859,6 +866,7 @@ cleanup
 get_voice
 prepare_voice
 extract_voice
+play-audio ${VOICE3}
 welcome_voice
 printf "\n${blue}[*] Configuring NetHunter for Termux ...\n"
 fix_profile_bash
