@@ -80,72 +80,21 @@ function set_strings() {
     VOICE7=$PREFIX/bin/kali_voice/Kali_NetHunter_for_Termux_installed_successfully.wav
     VOICE8=$PREFIX/bin/kali_voice/Modified_By_Tecnical_Shahinur_Al_Amin.wav
     VOICE9=$PREFIX/bin/kali_voice/xp_folder_open_sound.mp3
+    VOICE10=$PREFIX/bin/kali_voice/Using_Pulseaudio.wav
+    VOICE11=$PREFIX/bin/kali_voice/Configuring_Pulseaudio.wav
+    VOICE12=$PREFIX/bin/kali_voice/Downloading_rootfs..wav
 }
 
 function cleanup_voice_file() {
-    unset KEEP_VF1
-    if [ -f ${VOICE1} ]; then
-        KEEP_VF1=1
-    fi
-    if [ -z $KEEP_VF1 ]; then
-         rm -rf ${VOICE} ${VOICE_NAME}
-    fi
-    unset KEEP_VF2
-    if [ -f ${VOICE2} ]; then
-        KEEP_VF2=1
-    fi
-    if [ -z $KEEP_VF2 ]; then
-         rm -rf ${VOICE} ${VOICE_NAME}
-    fi
-    unset KEEP_VF3
-    if [ -f ${VOICE3} ]; then
-        KEEP_VF3=1
-    fi
-    if [ -z $KEEP_VF3 ]; then
-         rm -rf ${VOICE} ${VOICE_NAME}
-    fi
-    unset KEEP_VF4
-    if [ -f ${VOICE4} ]; then
-        KEEP_VF4=1
-    fi
-    if [ -z $KEEP_VF4 ]; then
-         rm -rf ${VOICE} ${VOICE_NAME}
-    fi
-    unset KEEP_VF5
-    if [ -f ${VOICE5} ]; then
-        KEEP_VF5=1
-    fi
-    if [ -z $KEEP_VF5 ]; then
-         rm -rf ${VOICE} ${VOICE_NAME}
-    fi
-    unset KEEP_VF6
-    if [ -f ${VOICE6} ]; then
-        KEEP_VF6=1
-    fi
-    if [ -z $KEEP_VF6 ]; then
-         rm -rf ${VOICE} ${VOICE_NAME}
-    fi
-    unset KEEP_VF7
-    if [ -f ${VOICE7} ]; then
-        KEEP_VF7=1
-    fi
-    if [ -z $KEEP_VF7 ]; then
-         rm -rf ${VOICE} ${VOICE_NAME}
-    fi
-    unset KEEP_VF8
-    if [ -f ${VOICE8} ]; then
-        KEEP_VF8=1
-    fi
-    if [ -z $KEEP_VF8 ]; then
-         rm -rf ${VOICE} ${VOICE_NAME}
-    fi
-    unset KEEP_VF9
-    if [ -f ${VOICE9} ]; then
-        KEEP_VF9=1
-    fi
-    if [ -z $KEEP_VF9 ]; then
-         rm -rf ${VOICE} ${VOICE_NAME}
-    fi
+    printf "${blue}\n[*] Checking voice files...${reset}\n"
+    for f in ${VOICE1} ${VOICE2} ${VOICE3} ${VOICE4} ${VOICE5} ${VOICE6} ${VOICE7} ${VOICE8} ${VOICE9} ${VOICE10} ${VOICE11} ${VOICE12}; do
+        if  [ -f $f ]; then
+            echo "Voice is Ok"
+        else
+            printf "Existing voice file not found Then deleted Voice directory...\n${reset}"
+            rm -rf ${VOICE} ${VOICE_NAME}
+        fi
+    done
 }
 
 function prepare_fs() {
@@ -176,9 +125,14 @@ function check_dependencies() {
     printf "${blue}\n[*] Checking package dependencies...${reset}\n"
     ## Workaround for termux-app issue #1283 (https://github.com/termux/termux-app/issues/1283)
     ##apt update -y &> /dev/null
-    termux-setup-storage -y && apt-get update -y &> /dev/null || apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" dist-upgrade -y &> /dev/null
-
-    for i in proot tar axel; do
+    apt-get update -y &> /dev/null || apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" dist-upgrade -y &> /dev/null
+    if [ -e $HOME/storage ]; then
+        echo "  Termux storage setup is OK"
+    else
+        printf "Configuring termux setup storage...\n"
+        termux-setup-storage
+    fi
+    for i in proot tar axel wget pulseaudio play-audio; do
         if [ -e $PREFIX/bin/$i ]; then
             echo "  $i is OK"
         else
@@ -189,12 +143,21 @@ function check_dependencies() {
             }
         fi
     done
-    apt upgrade -y && apt update && apt install wget -y && apt install pulseaudio -y && apt install play-audio -y
+    apt upgrade -y && apt update
 }
 
-function sound_default() {
-    DEFAULT_PA=$PREFIX/etc/pulse/default.pa
-    cat > $DEFAULT_PA <<- EOF
+function sound_setup() {
+    unset KEEP_TIME
+    if [ -f ${CHROOT}/usr/bin/tz ]; then
+        printf "${yellow}[!] Using Pulseaudio...${reset}\n\n"
+        play-audio ${VOICE10}
+        KEEP_TIME=1
+    fi
+    if [ -z $KEEP_TIME ]; then
+    printf "${blue}[*] Configuring Pulseaudio...${reset}\n\n"
+    play-audio ${VOICE11}
+        DEFAULT_PA=$PREFIX/etc/pulse/default.pa
+        cat > $DEFAULT_PA <<- EOF
 #!/data/data/com.termux/files/usr/bin/pulseaudio -nF
 #
 # This file is part of PulseAudio.
@@ -317,11 +280,10 @@ load-module module-filter-apply
 load-module module-sles-sink
 #load-module module-aaudio-sink
 EOF
-}
-
-function sound_daemon() {
-    DAEMON_CONF=$PREFIX/etc/pulse/daemon.conf
-    cat > $DAEMON_CONF <<- EOF
+    fi
+    if [ -z $KEEP_TIME ]; then
+        DAEMON_CONF=$PREFIX/etc/pulse/daemon.conf
+        cat > $DAEMON_CONF <<- EOF
 # This file is part of PulseAudio.
 #
 # PulseAudio is free software; you can redistribute it and/or modify
@@ -414,6 +376,7 @@ function sound_daemon() {
 ; deferred-volume-safety-margin-usec = 8000
 ; deferred-volume-extra-delay-usec = 0
 EOF
+    fi
 }
 
 function get_url() {
@@ -430,8 +393,10 @@ function get_rootfs() {
             printf "${yellow}[!] Using existing rootfs archive${reset}\n"
             KEEP_IMAGE=1
             return
-    fi    fi
+        fi
+    fi
     printf "${blue}[*] Downloading rootfs...${reset}\n\n"
+    play-audio ${VOICE12}
     get_url
     axel ${EXTRA_ARGS} --alternate "$ROOTFS_URL"
 }
@@ -445,6 +410,7 @@ function get_voice() {
         rm -rf ${VOICE} &&
     printf "${blue}[*] Downloading voice...${reset}\n\n"
     cd $PREFIX/bin &&  axel ${EXTRA_ARGS} --alternate "$VOICE_URL"
+    cd $HOME
     fi
 }
 
@@ -486,6 +452,7 @@ function extract_voice() {
     if [ -z $KEEP_VOICE ]; then
         printf "\n${blue}[*] Extracting voice... ${reset}\n\n"
         cd $PREFIX/bin && proot --link2symlink tar -xf $VOICE_NAME 2> /dev/null || :
+        cd $HOME
     else
         printf "${yellow}[!] Using existing voice directory${reset}\n"
     fi
@@ -657,10 +624,6 @@ EOF
 }
 
 function time_zone() {
-    unset KEEP_TIME
-    if [ -f ${CHROOT}/usr/bin/tz ]; then
-        KEEP_TIME=1
-    fi
     if [ -z $KEEP_TIME ]; then
     TIME_ZONE=${CHROOT}/usr/bin/tz
     cat > $TIME_ZONE <<- EOF
@@ -842,16 +805,15 @@ set_strings
 cleanup_voice_file
 prepare_fs
 check_dependencies
-sound_default
-sound_daemon
+get_voice
+extract_voice
+sound_setup
 get_rootfs
 get_sha
 verify_sha
 extract_rootfs
 create_launcher
 cleanup
-get_voice
-extract_voice
 play-audio ${VOICE3}
 welcome_voice
 printf "\n${blue}[*] Configuring NetHunter for Termux ...\n"
