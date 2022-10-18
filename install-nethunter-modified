@@ -69,26 +69,27 @@ function set_strings() {
     CHROOT=kali-${SYS_ARCH}
     IMAGE_NAME=kalifs-${SYS_ARCH}-full.tar.xz
     SHA_NAME=kalifs-${SYS_ARCH}-full.sha512sum
-    VOICE=$PREFIX/bin/kali_voice
-    VOICE_NAME=$PREFIX/bin/kali_voice.tar.xz
-    VOICE1=$PREFIX/bin/kali_voice/Welcome_to_Kali.wav
-    VOICE2=$PREFIX/bin/kali_voice/installing_voice.wav
-    VOICE3=$PREFIX/bin/kali_voice/NetHunter.wav
-    VOICE4=$PREFIX/bin/kali_voice/alhamdulillah.mp3
-    VOICE5=$PREFIX/bin/kali_voice/praise_be_to_God.mp3
-    VOICE6=$PREFIX/bin/kali_voice/congratulations.mp3
-    VOICE7=$PREFIX/bin/kali_voice/Kali_NetHunter_for_Termux_installed_successfully.wav
-    VOICE8=$PREFIX/bin/kali_voice/Modified_By_Tecnical_Shahinur_Al_Amin.wav
-    VOICE9=$PREFIX/bin/kali_voice/xp_folder_open_sound.mp3
-    VOICE10=$PREFIX/bin/kali_voice/Using_Pulseaudio.wav
-    VOICE11=$PREFIX/bin/kali_voice/Configuring_Pulseaudio.wav
-    VOICE12=$PREFIX/bin/kali_voice/Downloading_rootfs..wav
+    VOICE=/sdcard/kali_voice
+    VOICE_NAME=/sdcard/kali_voice.tar.xz
+    VOICE1=Welcome_to_Kali.wav
+    VOICE2=installing_voice.wav
+    VOICE3=NetHunter.wav
+    VOICE4=alhamdulillah.mp3
+    VOICE5=praise_be_to_God.mp3
+    VOICE6=congratulations.mp3
+    VOICE7=Kali_NetHunter_for_Termux_installed_successfully.wav
+    VOICE8=Modified_By_Tecnical_Shahinur_Al_Amin.wav
+    VOICE9=xp_folder_open_sound.mp3
+    VOICE10=Using_Pulseaudio.wav
+    VOICE11=Configuring_Pulseaudio.wav
+    VOICE12=Downloading_rootfs..wav
+    VOICE13=Extracting_rootfs.wav
 }
 
 function cleanup_voice_file() {
     printf "${blue}\n[*] Checking voice files...${reset}\n"
-    for f in ${VOICE1} ${VOICE2} ${VOICE3} ${VOICE4} ${VOICE5} ${VOICE6} ${VOICE7} ${VOICE8} ${VOICE9} ${VOICE10} ${VOICE11} ${VOICE12}; do
-        if  [ -f $f ]; then
+    for f in ${VOICE1} ${VOICE2} ${VOICE3} ${VOICE4} ${VOICE5} ${VOICE6} ${VOICE7} ${VOICE8} ${VOICE9} ${VOICE10} ${VOICE11} ${VOICE12} ${VOICE13}; do
+        if [ -e ${VOICE}/$f ]; then
             echo "Voice is Ok"
         else
             printf "Existing voice file not found Then deleted Voice directory...\n${reset}"
@@ -143,19 +144,19 @@ function check_dependencies() {
             }
         fi
     done
-    apt upgrade -y && apt update
+    apt upgrade -y
 }
 
 function sound_setup() {
     unset KEEP_TIME
     if [ -f ${CHROOT}/usr/bin/tz ]; then
         printf "${yellow}[!] Using Pulseaudio...${reset}\n\n"
-        play-audio ${VOICE10}
+        play-audio ${VOICE}/${VOICE10}
         KEEP_TIME=1
     fi
     if [ -z $KEEP_TIME ]; then
     printf "${blue}[*] Configuring Pulseaudio...${reset}\n\n"
-    play-audio ${VOICE11}
+    play-audio ${VOICE}/${VOICE11}
         DEFAULT_PA=$PREFIX/etc/pulse/default.pa
         cat > $DEFAULT_PA <<- EOF
 #!/data/data/com.termux/files/usr/bin/pulseaudio -nF
@@ -396,7 +397,7 @@ function get_rootfs() {
         fi
     fi
     printf "${blue}[*] Downloading rootfs...${reset}\n\n"
-    play-audio ${VOICE12}
+    play-audio ${VOICE}/${VOICE12}
     get_url
     axel ${EXTRA_ARGS} --alternate "$ROOTFS_URL"
 }
@@ -410,7 +411,6 @@ function get_voice() {
         rm -rf ${VOICE} &&
     printf "${blue}[*] Downloading voice...${reset}\n\n"
     cd $PREFIX/bin &&  axel ${EXTRA_ARGS} --alternate "$VOICE_URL"
-    cd $HOME
     fi
 }
 
@@ -438,6 +438,7 @@ function verify_sha() {
 function extract_rootfs() {
     if [ -z $KEEP_CHROOT ]; then
         printf "\n${blue}[*] Extracting rootfs... ${reset}\n\n"
+        play-audio ${VOICE}/${VOICE13}
         proot --link2symlink tar -xf $IMAGE_NAME 2> /dev/null || :
     else
         printf "${yellow}[!] Using existing rootfs directory${reset}\n"
@@ -451,8 +452,7 @@ function extract_voice() {
     fi
     if [ -z $KEEP_VOICE ]; then
         printf "\n${blue}[*] Extracting voice... ${reset}\n\n"
-        cd $PREFIX/bin && proot --link2symlink tar -xf $VOICE_NAME 2> /dev/null || :
-        cd $HOME
+        proot --link2symlink tar -xf $VOICE_NAME 2> /dev/null || : && cd $HOME
     else
         printf "${yellow}[!] Using existing voice directory${reset}\n"
     fi
@@ -464,7 +464,7 @@ function create_launcher() {
     cat > $NH_LAUNCHER <<- EOF
 #!/data/data/com.termux/files/usr/bin/bash -e
 cd \${HOME}
-play-audio ${VOICE9}
+play-audio ${VOICE}/${VOICE9}
 pulseaudio --start --load="module-native-protocol-tcp auth-ip-acl=127.0.0.1 auth-anonymous=1" --exit-idle-time=-1
 ## termux-exec sets LD_PRELOAD so let's unset it before continuing
 unset LD_PRELOAD
@@ -528,13 +528,13 @@ EOF
 
 function welcome_voice() {
     printf "${green}##*★*★*★*★*[  Welcome To Kali  ]*★*★*★*★*★*##\n"
-    play-audio ${VOICE1}
+    play-audio ${VOICE}/${VOICE1}
     printf "${light_cyan}##*****************************************##\n"
     printf "${light_cyan}## []\ [] []  []   [][\ /][]        [][]\  ##\n"
     printf "${light_cyan}## []\√[] []##[]‌   [] \√/ []        []  )] ##\n"
     printf "${light_cyan}## [] \[] []  []   []     [] ODIFIE [][]/  ##\n"
     printf "${light_cyan}##★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★##${reset}\n\n"
-    play-audio ${VOICE2}
+    play-audio ${VOICE}/${VOICE2}
 }
 
 function create_kex_launcher() {
@@ -636,7 +636,6 @@ EOF
 }
 
 function fix_profile_bash() {
-cd $HOME
     ## Prevent attempt to create links in read only filesystem
     if [ -f ${CHROOT}/root/.bash_profile ]; then
         sed -i '/if/,/fi/d' "${CHROOT}/root/.bash_profile"
@@ -757,9 +756,9 @@ function alhamdulillah() {
     printf "${green}######################${red}#####${green}######################\n"
     printf "${green}########################${red}#${green}########################\n"
     printf "${green}#################################################${reset}\n\n"
-    play-audio ${VOICE4}
-    play-audio ${VOICE5}
-    play-audio ${VOICE6}
+    play-audio ${VOICE}/${VOICE4}
+    play-audio ${VOICE}/${VOICE5}
+    play-audio ${VOICE}/${VOICE6}
 }
 
 function print_banner() {
@@ -814,7 +813,7 @@ verify_sha
 extract_rootfs
 create_launcher
 cleanup
-play-audio ${VOICE3}
+play-audio ${VOICE}/${VOICE3}
 welcome_voice
 printf "\n${blue}[*] Configuring NetHunter for Termux ...\n"
 fix_profile_bash
@@ -844,5 +843,5 @@ printf "${green}[+] nethunter -r          # To run NetHunter as root${reset}\n"
 #printf "${green}[+] nethunter -r kex <command> # Run command in NetHunter env as root${reset}\n"
 printf "${green}[+] nh                    # Shortcut for nethunter${reset}\n"
 printf "${green}[+] nh tz  #Time.Zone.Setup> 1st type nh then tz${reset}\n\n"
-play-audio ${VOICE7}
-play-audio ${VOICE8}
+play-audio ${VOICE}/${VOICE7}
+play-audio ${VOICE}/${VOICE8}
