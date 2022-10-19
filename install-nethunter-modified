@@ -410,7 +410,8 @@ function get_voice() {
     if [ -z $VOICE_FILE ]; then
         rm -rf ${VOICE} &&
     printf "${blue}[*] Downloading voice...${reset}\n\n"
-    cd $PREFIX/bin &&  axel ${EXTRA_ARGS} --alternate "$VOICE_URL"
+    cd /sdcard axel ${EXTRA_ARGS} --alternate "$VOICE_URL"
+    cd $HOME
     fi
 }
 
