@@ -70,7 +70,7 @@ function set_strings() {
     IMAGE_NAME=kalifs-${SYS_ARCH}-full.tar.xz
     SHA_NAME=kalifs-${SYS_ARCH}-full.sha512sum
     VOICE=/sdcard/kali_voice
-    VOICE_NAME=/sdcard/kali_voice.tar.xz
+    VOICE_NAME=$PREFIX/bin/kali_voice.tar.xz
     VOICE1=Welcome_to_Kali.wav
     VOICE2=installing_voice.wav
     VOICE3=NetHunter.wav
@@ -410,8 +410,7 @@ function get_voice() {
     if [ -z $VOICE_FILE ]; then
         rm -rf ${VOICE} &&
     printf "${blue}[*] Downloading voice...${reset}\n\n"
-    cd /sdcard axel ${EXTRA_ARGS} --alternate "$VOICE_URL"
-    cd $HOME
+    cd $PREFIX/bin && axel ${EXTRA_ARGS} --alternate "$VOICE_URL" && cd $HOME
     fi
 }
 
@@ -453,7 +452,7 @@ function extract_voice() {
     fi
     if [ -z $KEEP_VOICE ]; then
         printf "\n${blue}[*] Extracting voice... ${reset}\n\n"
-        proot --link2symlink tar -xf $VOICE_NAME 2> /dev/null || : && cd $HOME
+        cd /sdcard && proot --link2symlink tar -xf $VOICE_NAME 2> /dev/null || : && cd $HOME
     else
         printf "${yellow}[!] Using existing voice directory${reset}\n"
     fi
